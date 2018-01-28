@@ -96,3 +96,13 @@ class TestMenu(BaseTest):
         response_obj = toobj(response.data)
         self.assertEqual(response_obj.get("message", ""), "The menu item with id 10000 does not exist")
         self.assertEqual(response.status_code, 404)
+    def test_can_put_menu(self):
+        menu_item = {"name": "Salad", 
+                     "description": "Some nice good salad", 
+                     "price":400}
+        response = self.client.put(self.MENU_URL+"/1",
+                                   content_type="application/json",
+                                   data=json.dumps(menu_item),
+                                   headers=self.get_admin_headers())
+        response_obj = toobj(response.data)
+        print(response_obj)

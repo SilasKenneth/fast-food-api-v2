@@ -111,6 +111,11 @@ class BaseTest(TestCase):
             "items": '1,1,1,1,1,1'
         }
 
+        self.order_with_no_items = {
+             "address": "1",
+             "items":""
+        }
+
     @classmethod
     def setUpClass(cls):
         cls.database = database

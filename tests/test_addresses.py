@@ -36,7 +36,7 @@ class TestAddress(BaseTest):
                                    content_type="application/json")
         response2 = self.client.get(self.ADDRESS_URL + "/2",
                                     headers=self.get_user_headers())
-        response_obj = toobj(response2.data)
+        response_obj = toobj(response.data)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response_obj.get("message", ""), "success")
 

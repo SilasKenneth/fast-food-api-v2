@@ -426,13 +426,13 @@ class Address(Base):
         if not address:
             return []
         new_add = cls.format(address)
-        print(new_add)
+        #print(new_add)
         if new_add is None:
             import pdb;pdb.set_trace()
             return []
         #print(new_add)
         if int(new_add.user_id) != int(user_id):
-            print("So what")
+            #print("So what")
             return []
         return new_add
 
