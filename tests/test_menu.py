@@ -104,5 +104,9 @@ class TestMenu(BaseTest):
                                    content_type="application/json",
                                    data=json.dumps(menu_item),
                                    headers=self.get_admin_headers())
+        print(response.data)
         response_obj = toobj(response.data)
         print(response_obj)
+        self.assertEqual(response_obj.get("message", ""), 
+            "The menu item was successfully updated")
+        self.assertEqual(response.status_code, 200)
