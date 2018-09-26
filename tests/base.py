@@ -12,6 +12,7 @@ class BaseTest(TestCase):
         self.client = self.app.test_client()
         self.MENU_URL = "/api/v2/menu"
         self.ORDER_URL = "/api/v2/orders"
+        self.AUTH_URL = "/api/v2/auth/"
         self.sample_meal = {
             "name": "Soda na chips",
             "description": "This is menu item that every single customer of ours prefers"
@@ -34,6 +35,12 @@ class BaseTest(TestCase):
             "name": "Silly meal",
             "price": 200,
             "description": ""
+        }
+        self.test_user = {
+            "username": "silaskenn",
+            "password": "SilasK@2018",
+            "confirm_pass": "SilasK@2018",
+            "email": "silaskenn@gmail.com"
         }
 
     def tearDown(self):
