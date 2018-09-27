@@ -41,4 +41,8 @@ def valid_description(desc):
 
 
 def toobj(jsonified):
-    return json.loads(jsonified)
+    try:
+        res = json.loads(jsonified)
+        return res
+    except Exception as ex:
+        return {}
