@@ -6,7 +6,7 @@ install:
 services:
   - postgresql
 before_script:
-  - createdb testdb
+  - createdb testdb;
 script:
   - python -m pytest
 addons:
