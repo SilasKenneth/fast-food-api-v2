@@ -1,0 +1,16 @@
+language: python
+python:
+  - "3.6"
+env:
+  - DB_NAME=testdb
+  - DB_USER=postgres
+  - DB_PASSWORD=
+  - DB_HOST=localhost
+install:
+  - pip install -r requirements.txt
+services:
+  - postgresql
+before_script:
+  - createdb testdb;
+script:
+  - python -m pytest
