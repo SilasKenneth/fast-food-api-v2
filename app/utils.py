@@ -46,3 +46,46 @@ def toobj(jsonified):
         return res
     except Exception as ex:
         return {}
+
+
+def validate_email(email):
+    if not isinstance(email, str):
+        return False
+    if len(email) <= 7:
+        return False
+    ans = re.match("^.+@(\\[?)[a-zA-Z0-9-.]+.([a-zA-Z]{2,3}|[0-9]{1,3})(]?)$", email)
+    if ans is None:
+        return False
+    return True
+
+
+def validate_password(password):
+    if not isinstance(password, str):
+        return False
+    ans = re.match(r"(?=.*[A-Za-z0-9])(?=.*[A-Z])(?=.*\d)(?=.*[#$^+=!*()@%&]).{6,12}", password)
+    if ans is None:
+        return False
+    return True
+
+
+def validate_username(username):
+    if not isinstance(username, str):
+        return False
+    if len(username) < 6 or len(username) > 12:
+        return False
+    else:
+        ans = re.match(r'^[a-z|\s]+$', username)
+        if ans is None:
+            return False
+        return True
+
+
+def validate_fullname(names):
+    if not isinstance(names, str):
+        return False
+    if len(names) < 12 or len(names) > 50:
+        return False
+    ans = re.match(r'^[A-Z][a-z]{4,20} [A-Z][a-z]{4,20}$', names)
+    if ans is None:
+        return False
+    return True

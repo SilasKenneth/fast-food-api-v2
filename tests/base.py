@@ -1,13 +1,12 @@
 from unittest import TestCase
 from app import create_app
 from app.db import database
+from copy import deepcopy
 
 
 class BaseTest(TestCase):
     def setUp(self):
         self.database = database
-        self.database.drop_tables()
-        self.database.create_tables()
         self.app = create_app("testing")
         self.client = self.app.test_client()
         self.MENU_URL = "/api/v2/menu"
@@ -37,11 +36,41 @@ class BaseTest(TestCase):
             "description": ""
         }
         self.test_user = {
+            "fullnames": "Silas Kenneth",
             "username": "silaskenn",
             "password": "SilasK@2018",
             "confirm_pass": "SilasK@2018",
             "email": "silaskenn@gmail.com"
         }
+        self.test_user_invalid_password = {
+            "username": "silaskenn",
+            "password": "SilasK@2019"
+        }
+        self.user_invalid_username = {
+            "username": "wronusername",
+            "password": "SilasK@2019"
+        }
+        self.user_unmet_password = {
+            "fullnames": self.test_user['fullnames'],
+            "username": "silaskenny",
+            "email": "silaskenn@gmail.com",
+            "password": "Silas2019",
+            "confirm_pass": "Silas2019"
+        }
+        self.user_invalid_email = {
+            "username": "silaskenn",
+            "fullnames": "Silas Kenneth",
+            "email": "silask@no",
+            "password": "Nyamwaro@2012",
+            "confirm_pass": "Nyamwaro@2012"
+        }
+        self.user_invalid_username_signup = deepcopy(self.test_user)
+        self.user_invalid_username_signup['username'] = "Invalid100"
 
-    def tearDown(self):
-        self.database.drop_tables()
+    @classmethod
+    def setUpClass(cls):
+        cls.database = database
+        cls.database.create_tables()
+    @classmethod
+    def tearDownClass(cls):
+        cls.database.drop_tables()
