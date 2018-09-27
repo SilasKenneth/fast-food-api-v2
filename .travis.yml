@@ -9,5 +9,3 @@ before_script:
   - createdb testdb;
 script:
   - python -m pytest
-addons:
-  postgresql: "10"
