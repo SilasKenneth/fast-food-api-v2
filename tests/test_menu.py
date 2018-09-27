@@ -43,3 +43,9 @@ class TestMenu(BaseTest):
         self.assertNotEqual(response_obj, None)
         self.assertEqual(response_obj.get("message", None), "There was problem saving the item. Try again")
         self.assertEqual(response.status_code, 403)
+    def test_cannot_add_invalid_name(self):
+        response = self.client.post(self.MENU_URL, data=json.dumps(self.sample_meal), content_type="application/json")
+        response_obj = toobj(response.data)
+        self.assertNotEqual(response_obj, None)
+        self.assertEqual(response_obj.get("message", None), "There was problem saving the item. Try again")
+        self.assertEqual(response.status_code, 403)
