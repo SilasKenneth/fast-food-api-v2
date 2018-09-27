@@ -9,6 +9,7 @@ class SQLs(object):
            CREATE TABLE if not exists users(
            id serial primary key , 
            username varchar(25) not null , 
+           fullnames varchar(75) not null,
            password varchar(140) not null ,
            unique(username))
         """
