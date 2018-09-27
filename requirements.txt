@@ -1,0 +1,14 @@
+aniso8601==3.0.2
+Click==7.0
+Flask==1.0.2
+Flask-JWT==0.3.2
+Flask-JWT-Extended==3.13.0
+Flask-RESTful==0.3.6
+itsdangerous==0.24
+Jinja2==2.10
+MarkupSafe==1.0
+psycopg2-binary==2.7.5
+PyJWT==1.4.2
+pytz==2018.5
+six==1.11.0
+Werkzeug==0.14.1
