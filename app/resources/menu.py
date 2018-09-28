@@ -30,15 +30,22 @@ class MenuResource(Resource):
         saved = menu_item.save()
         if saved:
             return {"message": "The menu item was successfully saved", "data":
-                    menu_item.json}, 201
+                menu_item.json}, 201
         return {"message": "There was problem saving the item. Try again"}, 403
+
     def put(self, menu_id):
         pass
 
     def get(self, meal_id=None):
         if meal_id is None:
             meals = Menu.all()
-            return {"menu": meals}
+            return {"menu": meals}, 200
+        if not isinstance(meal_id, str) and not isinstance(meal_id, int):
+            return {"message": "The menu item with id %s does not exist" % meal_id}, 404
+        meal = Menu.find_by_id(meal_id)
+        if not meal:
+            return {"message": "The menu item with id %s does not exist" % meal_id}, 404
+        return {"item": meal.json}
 
     def delete(self, meal_id):
         pass
