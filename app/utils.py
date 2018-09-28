@@ -1,5 +1,16 @@
 import re
 import json
+from functools import wraps
+
+from flask_jwt_extended import (
+    JWTManager,
+    jwt_required,
+    get_jwt_identity,
+    get_jwt_claims,
+    create_access_token,
+    create_refresh_token,
+    verify_jwt_in_request
+)
 
 
 def empty(value):
@@ -89,3 +100,15 @@ def validate_fullname(names):
     if ans is None:
         return False
     return True
+
+
+def admin_token_required(func):
+    @wraps
+    def wrapper(*args, **kwargs):
+        verify_jwt_in_request()
+        claims = get_jwt_claims()
+        if claims.get("user_type", None) != '0':
+            return {"message": "Your access token isn't allowed to access this endpoint"}, 403
+        else:
+            return func(*args, **kwargs)
+    return wrapper

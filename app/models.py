@@ -125,10 +125,9 @@ class Menu(Base):
             )
             self.cursor.execute(sql)
             self.conn.commit()
-            self.cursor.close()
             return True
         except Exception as ex:
-            print(ex)
+            # print(ex)
             self.conn.rollback()
             return False
 
@@ -193,7 +192,7 @@ class Order(Base):
             return []
         return []
     @classmethod
-    def find_by_id(cls, table_name="orders"):
+    def find_by_id(cls, table_name="orders", ids=None):
         order = super(Order, cls).find_by_id(table_name)
         if not order:
             return []

@@ -55,7 +55,6 @@ class SQLs(object):
 
 
 class Database(SQLs):
-
     def __init__(self):
         super(Database, self).__init__()
         self.username = os.getenv("DB_USER", None)
