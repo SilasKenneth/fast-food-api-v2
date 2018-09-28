@@ -35,6 +35,11 @@ class BaseTest(TestCase):
             "price": 200,
             "description": ""
         }
+        self.meal_with_invalid_name = {
+            "name": "199191",
+            "price": 200,
+            "description": self.sample_meal['description']
+        }
         self.test_user = {
             "fullnames": "Silas Kenneth",
             "username": "silaskenn",
