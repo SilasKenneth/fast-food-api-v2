@@ -21,30 +21,90 @@ class Base(object):
             cls.conn.rollback()
             return []
 
+    def find_by_id(self, table_name, ids):
+        try:
+            sql = "SELECT * FROM %s WHERE ids = '%s'" % (table_name, ids)
+            if self.conn is None:
+                return []
+            self.cursor.execute(sql)
+            record = self.cursor.fetchone()
+            return record
+        except Exception as ex:
+            return []
+
 
 class User(Base):
 
-    def __init__(self, username, password, email):
+    def __init__(self, fullnames, username, password, email):
         super(User, self).__init__()
         self.id = None
+        self.fullnames = fullnames
         self.username = username
         self.email = email
         self.password = generate_password_hash(password)
 
     def save(self):
         try:
+            fullnames = self.fullnames
             username = self.username
             password = self.password
             email = self.email
-            sql = "INSERT INTO users(username, email, password)values('%s', '%s', '%s')" % (username, email, password)
+            sql = "INSERT INTO users(fullnames, username, email, password)values('%s', '%s', '%s', '%s')" % \
+                  (
+                      fullnames,
+                      username,
+                      email,
+                      password
+                  )
             if self.conn is None:
                 return False
             self.cursor.execute(sql)
             self.conn.commit()
             return True
         except Exception as ex:
+            print(ex)
             self.conn.rollback()
             return False
+
+    @property
+    def json(self):
+        return {
+            "fullnames": self.fullnames,
+            "username": self.username,
+            "email": self.email
+        }
+
+    @classmethod
+    def get_by_username_or_email(cls, username):
+        try:
+            sql = "SELECT * FROM users WHERE username = '%s' or email = '%s'" % (
+                username,
+                username
+            )
+            if cls.conn is None:
+                return None
+            cls.cursor.execute(sql)
+            record = cls.cursor.fetchone()
+            if not record:
+                return None
+            found = User(
+                username=record[1],
+                password=record[4],
+                email=record[3],
+                fullnames=record[2]
+            )
+            found.id = record[0]
+            found.password = record[4]
+            return found
+        except Exception as ex:
+            print(ex)
+            return None
+
+    def get_orders(self):
+        try:
+            pass
+        except Exception as ex:
+            return {}
 
 
 class Menu(Base):
@@ -82,6 +142,7 @@ class Menu(Base):
     @classmethod
     def all(cls):
         return super(Menu, cls).all("meals")
+
     @property
     def json(self):
         return {
@@ -90,14 +151,22 @@ class Menu(Base):
             "price": self.price
         }
 
+    @classmethod
+    def find_by_id(cls, meal_id):
+        menu_item = super(Menu, cls).find_by_id("meals", meal_id)
+        if not menu_item:
+            return None
+        return menu_item
+
 
 class Order(Base):
-    def __init__(self, customer_id, items):
+    def __init__(self, customer_id, address_id, items):
         super(Order, self).__init__()
         self.id = None
         self.reference = uuid.uuid4()
         self.customer_id = customer_id
-        self.items = self.items
+        self.items = items
+        self.address = address_id
         self.date_ordered = datetime.datetime.utcnow()
         self.status = "pending"
 
@@ -118,5 +187,14 @@ class Order(Base):
             return False
 
     @classmethod
-    def all(cls):
-        return super(Order, cls).all("orders")
+    def all(cls, table="orders"):
+        records = super(Order, cls).all(table)
+        if not records:
+            return []
+        return []
+    @classmethod
+    def find_by_id(cls, table_name="orders"):
+        order = super(Order, cls).find_by_id(table_name)
+        if not order:
+            return []
+        return []

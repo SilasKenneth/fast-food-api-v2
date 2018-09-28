@@ -10,8 +10,10 @@ class SQLs(object):
            id serial primary key , 
            username varchar(25) not null , 
            fullnames varchar(75) not null,
+           email varchar(100) not null,
            password varchar(140) not null ,
-           unique(username))
+           unique(username),
+           unique(email))
         """
         self.address_sql = """
            CREATE TABLE if not exists addresses(

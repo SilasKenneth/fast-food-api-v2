@@ -19,7 +19,7 @@ class Development(Config):
 class Production(Config):
     DEBUG = False
     ENV = "production"
-    DB_NAME = os.getenv("DB_FAST_FOOD", "fastfoodfast")
+    DB_NAME = os.getenv("DB_FAST_FOOD", "fast_food")
 
 
 class Testing(Config):
