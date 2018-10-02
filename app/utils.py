@@ -1,16 +1,8 @@
 import re
 import json
 from functools import wraps
-
-from flask_jwt_extended import (
-    JWTManager,
-    jwt_required,
-    get_jwt_identity,
-    get_jwt_claims,
-    create_access_token,
-    create_refresh_token,
-    verify_jwt_in_request
-)
+import jwt
+from flask import request, current_app
 
 
 def empty(value):
@@ -52,6 +44,7 @@ def valid_description(desc):
 
 
 def toobj(jsonified):
+    """Use json.loads without having to write it every now and again"""
     try:
         res = json.loads(jsonified)
         return res
@@ -60,6 +53,7 @@ def toobj(jsonified):
 
 
 def validate_email(email):
+    """Validator to check if email requirements are met"""
     if not isinstance(email, str):
         return False
     if len(email) <= 7:
@@ -71,6 +65,7 @@ def validate_email(email):
 
 
 def validate_password(password):
+    """Validator to check is password requirements are met"""
     if not isinstance(password, str):
         return False
     ans = re.match(r"(?=.*[A-Za-z0-9])(?=.*[A-Z])(?=.*\d)(?=.*[#$^+=!*()@%&]).{6,12}", password)
@@ -80,6 +75,7 @@ def validate_password(password):
 
 
 def validate_username(username):
+    """A validator to check if username requirements are met"""
     if not isinstance(username, str):
         return False
     if len(username) < 6 or len(username) > 12:
@@ -102,13 +98,72 @@ def validate_fullname(names):
     return True
 
 
+def normal_token_required(func):
+    """Make sure that a token is provided"""
+
+    @wraps(func)
+    def decorated(*args, **kwargs):
+        access_token = None
+        try:
+            authorization_header = request.headers.get('Authorization')
+            if authorization_header:
+                access_token = authorization_header.split(' ')[1]
+            if access_token:
+                decoded_token = decode_token(access_token)
+                print(decoded_token)
+                user_id = decoded_token.get("id", None)
+                role = decoded_token.get("user_type", None)
+                if role != "normal":
+                    return {"message": "Invalid access token provided please login to view"
+                                       " get a valid token"}, 401
+                if user_id is None:
+                    return {"message": "Invalid access token provided please login to view"
+                                       " get a valid token"}, 401
+                return func(*args, **kwargs)
+            return {'message': "Please login first, your session might have expired"}, 401
+        except Exception as e:
+            return {'message': 'An error occured while decoding token.', 'error': str(e)}, 400
+
+    return decorated
+
+
 def admin_token_required(func):
-    @wraps
-    def wrapper(*args, **kwargs):
-        verify_jwt_in_request()
-        claims = get_jwt_claims()
-        if claims.get("user_type", None) != '0':
-            return {"message": "Your access token isn't allowed to access this endpoint"}, 403
-        else:
-            return func(*args, **kwargs)
-    return wrapper
+    """Make sure that a token is provided"""
+
+    @wraps(func)
+    def decorated(*args, **kwargs):
+        access_token = None
+        try:
+            authorization_header = request.headers.get('Authorization')
+            if authorization_header:
+                access_token = authorization_header.split(' ')[1]
+            if access_token:
+                decoded_token = decode_token(access_token)
+                user_id = decoded_token.get("id", None)
+                role = decoded_token.get("user_type", None)
+                # print(decoded_token)
+                if role != "admin":
+                    return {"message": "Invalid access token provided please login to view"
+                                       " get a valid token"}, 401
+                if user_id is None or role is None:
+                    return {"message": "Invalid access token provided please login to view"
+                                       " get a valid token"}, 401
+                return func(*args, **kwargs)
+            return {'message': "Please login first, your session might have expired"}, 401
+        except Exception as e:
+            # print(e)
+            return {'message': 'An error occurred while decoding token.', 'error': str(e)}, 400
+
+    return decorated
+
+
+def decode_token(token):
+    try:
+        if not isinstance(token, (bytes, str)):
+            return {}
+        claims = jwt.decode(token, current_app.config.get("JWT_SECRET_KEY"), True,
+                            algorithms=["HS256"])
+        return claims
+    except Exception as ex:
+        print(ex)
+        return {}
