@@ -1,7 +1,5 @@
 from flask import request
 from flask_restful import Resource, reqparse
-
-<<<<<<< Updated upstream
 from app.models import Order, Address, Menu
 from app.utils import (admin_token_required,
                        normal_token_required,
@@ -39,6 +37,7 @@ class OrderResource(Resource):
                                    ". Try another" %
                                    item}, 404
             ordered_items.append(item_object)
+        order = Order()
         return {"message": "The order was successfully placed", "order": order.json1}, 200
 
     @normal_token_required
@@ -61,10 +60,10 @@ class AdminOrderResource(Resource):
         if order_id is None:
             pass
         order = ""
+    @admin_token_required
     def put(self, order_id):
-        pass
-            orders = Order.all()
-            result = [order.json for order in orders]
+        orders = Order.all()
+        result = [order.json for order in orders]
             return {"message": "success", "orders": result}, 200
         order = Order.find_by_id(ids=order_id)
         if not order:
