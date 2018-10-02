@@ -2,34 +2,44 @@ import uuid
 import datetime
 from werkzeug.security import generate_password_hash
 from app.db import database
+from app.utils import decode_token as claims
+import psycopg2
 
 
 class Base(object):
     conn = database.connection
     cursor = database.cursor
 
+    def __init__(self):
+        self.conn = database.connection
+        print(self.conn)
+        self.cursor = database.cursor
+
     @classmethod
-    def all(cls, table):
+    def all(cls, table, token=None):
         try:
-            sql = "SELECT * FROM %s" % (table)
+            sql = "SELECT * FROM %s order by id" % (table)
             if cls.conn is None:
                 return []
             cls.cursor.execute(sql)
             records = cls.cursor.fetchall()
             return records
-        except Exception as ex:
+        except psycopg2.Error as ex:
+            print(ex)
             cls.conn.rollback()
             return []
 
-    def find_by_id(self, table_name, ids):
+    @classmethod
+    def find_by_id(cls, table_name, ids, token=None):
         try:
-            sql = "SELECT * FROM %s WHERE ids = '%s'" % (table_name, ids)
-            if self.conn is None:
+            sql = "SELECT * FROM %s WHERE id = '%s'" % (table_name, ids)
+            if cls.conn is None:
                 return []
-            self.cursor.execute(sql)
-            record = self.cursor.fetchone()
+            cls.cursor.execute(sql)
+            record = cls.cursor.fetchone()
             return record
         except Exception as ex:
+            print(ex)
             return []
 
 
@@ -42,6 +52,9 @@ class User(Base):
         self.username = username
         self.email = email
         self.password = generate_password_hash(password)
+        self.addresses = []
+        self.orders = []
+        self.user_type = 0
 
     def save(self):
         try:
@@ -69,9 +82,11 @@ class User(Base):
     @property
     def json(self):
         return {
+            "id": self.id,
             "fullnames": self.fullnames,
             "username": self.username,
-            "email": self.email
+            "email": self.email,
+            "user_type": "admin" if self.user_type == 0 else "normal"
         }
 
     @classmethod
@@ -93,22 +108,31 @@ class User(Base):
                 email=record[3],
                 fullnames=record[2]
             )
+            # print(found)
             found.id = record[0]
             found.password = record[4]
             return found
         except Exception as ex:
-            print(ex)
+            # print("Some stupid error occurs here")
             return None
 
     def get_orders(self):
         try:
-            pass
+            sql = "SELECT * FROM orders WHERE user_id = '%s' order by id" % (
+                self.id
+            )
         except Exception as ex:
             return {}
 
 
 class Menu(Base):
     def __init__(self, name, description, price):
+        """
+        The class constructor for the menu model
+        :param name:
+        :param description:
+        :param price:
+        """
         super(Menu, self).__init__()
         self.id = None
         self.name = name
@@ -117,12 +141,16 @@ class Menu(Base):
         self.date_added = datetime.datetime.utcnow()
 
     def save(self):
+        """Save a menu item to the database
+        :rtype: Boolean
+        """
         try:
-            sql = "INSERT INTO meals(name, description, price)values('%s', '%s', '%s')" % (
-                self.name,
-                self.description,
-                self.price
-            )
+            sql = "INSERT INTO meals(name, description, price)values('%s', '%s', '%s')" \
+                  % (
+                      self.name,
+                      self.description,
+                      self.price
+                  )
             self.cursor.execute(sql)
             self.conn.commit()
             return True
@@ -139,23 +167,51 @@ class Menu(Base):
             pass
 
     @classmethod
-    def all(cls):
-        return super(Menu, cls).all("meals")
+    def format(cls, menu):
+        menus = Menu(menu[1], menu[2], menu[3])
+        menus.id = menu[0]
+        return menus.json, menus
+
+    @classmethod
+    def all(cls, token=None, **kwargs):
+        items = super(Menu, cls).all("meals")
+        res = []
+        for item in items:
+            res.append(cls.format(item)[0])
+        return res
 
     @property
     def json(self):
         return {
+            "menu_id": str(self.id),
             "name": self.name,
             "description": self.description,
-            "price": self.price
+            "price": str(self.price)
         }
 
     @classmethod
-    def find_by_id(cls, meal_id):
-        menu_item = super(Menu, cls).find_by_id("meals", meal_id)
+    def find_by_id(cls, table_name="", meal_id="", token=None):
+        menu_item = super(Menu, cls).find_by_id("meals", meal_id, token)
         if not menu_item:
             return None
-        return menu_item
+        return cls.format(menu_item)[-1]
+
+    def update(self):
+        try:
+            sql = "UPDATE meals SET name= '%s', description='%s', price='%s' WHERE id = '%s'" % (
+                self.name,
+                self.description,
+                self.price,
+                self.id
+            )
+            if self.conn is None:
+                return False
+            self.cursor.execute(sql)
+            return True
+        except psycopg2.Error as ex:
+            print(ex)
+            self.conn.rollback()
+            return False
 
 
 class Order(Base):
@@ -169,14 +225,15 @@ class Order(Base):
         self.date_ordered = datetime.datetime.utcnow()
         self.status = "pending"
 
-    def save(self):
+    def save(self, token=None):
         try:
-            sql = "INSERT INTO orders(reference, customer_id, date_ordered, status)VALUES ('%s', '%s', '%s', '%s')" % (
-                self.reference,
-                self.customer_id,
-                self.date_ordered,
-                self.status
-            )
+            sql = "INSERT INTO orders(reference, customer_id, date_ordered, status)VALUES" \
+                  " ('%s', '%s', '%s', '%s')" % (
+                      self.reference,
+                      self.customer_id,
+                      self.date_ordered,
+                      self.status
+                  )
             if self.conn is None:
                 return False
             self.cursor.execute(sql)
@@ -191,9 +248,28 @@ class Order(Base):
         if not records:
             return []
         return []
+
     @classmethod
-    def find_by_id(cls, table_name="orders", ids=None):
-        order = super(Order, cls).find_by_id(table_name)
+    def find_by_id(cls, table_name="orders", ids=None, token=None):
+        order = super(Order, cls).find_by_id(table_name, ids, token)
         if not order:
-            return []
-        return []
+            return {}
+        return {}
+
+
+class Address(Base):
+    def __init__(self, town, street, phone):
+        super(Address, self).__init__()
+        self.id = None
+        self.town = town
+        self.street = street
+        self.phone = phone
+        self.user_id = None
+
+    @classmethod
+    def get_by_id(cls, address_id="", token=None):
+        address = super(Address, cls).find_by_id(
+            table_name="addresses", ids=address_id)
+        who_this_is = claims(token)
+        print(token)
+        return address

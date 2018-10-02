@@ -1,8 +1,8 @@
 import os
-import uuid
 from flask_restful import Resource, reqparse
 from werkzeug.security import check_password_hash
 import jwt
+from flask import current_app
 from app.utils import (validate_username,
                        validate_password,
                        validate_email, empty,
@@ -62,15 +62,15 @@ class LoginResource(Resource):
         username = args.get("username", "")
         password = args.get("password", "")
         user = User.get_by_username_or_email(username)
+        print(user)
         if user is None:
             return {"message": "Incorrect username or password provided"}, 403
         if not check_password_hash(user.password, password):
             return {"message": "Incorrect username or password provided"}, 403
         payload = user.json
-        key = os.getenv("JWT_SECRET_KEY", None)
-        if key is None:
-            os.putenv("JWT_SECRET_KEY", str(uuid.uuid4()))
-        token = jwt.encode(payload=payload, key=os.getenv("JWT_SECRET_KEY", "SomeKey")).decode("utf8")
+        key = current_app.config.get("JWT_SECRET_KEY")
+        token = jwt.encode(payload=payload, key=key)
+        token = token.decode("utf-8")
         return {"message": "You successfully logged in", "token": str(token)}
 
 
