@@ -1,3 +1,4 @@
+import json
 from unittest import TestCase
 from app import create_app
 from app.db import database
@@ -71,7 +72,14 @@ class BaseTest(TestCase):
         }
         self.user_invalid_username_signup = deepcopy(self.test_user)
         self.user_invalid_username_signup['username'] = "Invalid100"
-
+        self.test_user_login = {
+            "username": "silaskenn",
+            "password": "SilasK@2018"
+        }
+        self.test_user_admin = {
+            "username": "admin@gmail.com",
+            "password": "Admin@123"
+        }
     @classmethod
     def setUpClass(cls):
         cls.database = database
@@ -79,3 +87,14 @@ class BaseTest(TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.database.drop_tables()
+    def logged_in_user(self):
+        response = self.client.post("/api/v2/auth/login", data=json.dumps(self.test_user), content_type="application/json")
+        response_obj = {}
+        try:
+            response_obj = json.loads(response.data)
+        except Exception as ex:
+            response_obj = {}
+        return response_obj.get(
+
+        )
+
