@@ -1,6 +1,7 @@
-from psycopg2 import connect
-from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 import os
+import psycopg2
+
+from psycopg2 import connect
 
 
 class SQLs(object):
@@ -11,6 +12,7 @@ class SQLs(object):
            username varchar(25) not null , 
            fullnames varchar(75) not null,
            email varchar(100) not null,
+           user_type integer not null default 1,
            password varchar(140) not null ,
            unique(username),
            unique(email))
@@ -55,16 +57,15 @@ class SQLs(object):
 
 
 class Database(SQLs):
-
     def __init__(self):
         super(Database, self).__init__()
         self.username = os.getenv("DB_USER", None)
-        self.db = os.getenv("DB_FAST_FOOD_TEST", None)
+        self.database = os.getenv("DB_FAST_FOOD_TEST", None)
         self.host = os.getenv("DB_HOST", None)
         self.password = os.getenv("DB_PASSWORD", None)
         self.connection = connect(host=self.host,
                                   port=5432,
-                                  database=self.db,
+                                  database=self.database,
                                   user=self.username,
                                   password=self.password)
         self.cursor = self.connection.cursor()
@@ -73,28 +74,32 @@ class Database(SQLs):
         try:
             self.cursor.execute(self.meal_sql)
             self.connection.commit()
-        except Exception as ex:
+        except psycopg2.Error as ex:
+            print(ex)
             self.connection.rollback()
 
     def create_orders_table(self):
         try:
             self.cursor.execute(self.order_sql)
             self.connection.commit()
-        except Exception as ex:
+        except psycopg2.Error as ex:
+            print(ex)
             self.connection.rollback()
 
     def create_order_products_table(self):
         try:
             self.cursor.execute(self.order_meals_sql)
             self.connection.commit()
-        except Exception as ex:
+        except psycopg2.Error as ex:
+            print(ex)
             self.connection.rollback()
 
     def create_users_table(self):
         try:
             self.cursor.execute(self.users_sql)
             self.connection.commit()
-        except Exception as ex:
+        except psycopg2.Error as ex:
+            print(ex)
             self.connection.rollback()
 
     def create_addresses_table(self):
@@ -104,7 +109,8 @@ class Database(SQLs):
             self.cursor.execute(self.address_sql)
             self.connection.commit()
             return True
-        except Exception as ex:
+        except psycopg2.Error as ex:
+            print(ex)
             return False
 
     def create_tables(self):
@@ -127,7 +133,8 @@ class Database(SQLs):
             self.cursor.execute(drop_order_sql)
             self.cursor.execute(drop_users_sql)
             self.connection.commit()
-        except Exception as ex:
+        except psycopg2.Error as ex:
+            print(ex)
             self.connection.rollback()
 
 
