@@ -78,7 +78,7 @@ def validate_username(username):
     """A validator to check if username requirements are met"""
     if not isinstance(username, str):
         return False
-    if len(username) < 6 or len(username) > 12:
+    if len(username) < 3 or len(username) > 12:
         return False
     else:
         ans = re.match(r'^[a-z|\s]+$', username)
