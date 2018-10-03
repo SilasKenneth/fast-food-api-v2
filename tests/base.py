@@ -4,7 +4,6 @@ from app import create_app
 from app.db import database
 from copy import deepcopy
 
-
 class BaseTest(TestCase):
     def setUp(self):
         self.database = database
@@ -15,7 +14,7 @@ class BaseTest(TestCase):
         self.AUTH_URL = "/api/v2/auth/"
         self.sample_meal = {
             "name": "Soda na chips",
-            "description": "This is menu item that every single customer of ours prefers"
+            "description": "This is menu item"
                            " ordering at any given moment",
             "price": 200
         }
@@ -76,9 +75,9 @@ class BaseTest(TestCase):
             "username": "silaskenn",
             "password": "SilasK@2018"
         }
-        self.test_user_admin = {
-            "username": "admin@gmail.com",
-            "password": "Admin@123"
+        self.user_tests_admin = {
+            "username": "silaskenny",
+            "password": "SilasK@2019"
         }
 
     @classmethod
@@ -89,14 +88,31 @@ class BaseTest(TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.database.drop_tables()
+        cls.database.create_tables()
+        cls.database.create_default_admin()
 
     def logged_in_user(self):
         response = self.client.post("/api/v2/auth/login", data=json.dumps(self.test_user_login),
                                     content_type="application/json")
-        response_obj = {}
         try:
             response_obj = json.loads(response.data)
         except Exception as ex:
             response_obj = {}
         return response_obj.get("token", "")
 
+    def logged_in_admin(self):
+        response = self.client.post("/api/v2/auth/login", data=json.dumps(self.user_tests_admin),
+                                    content_type="application/json")
+        try:
+            response_obj = json.loads(response.data)
+        except Exception as ex:
+            response_obj = {}
+        print("Admin here")
+        token = response_obj.get("token", "")
+        return response_obj.get("token", "")
+    def get_admin_headers(self):
+        headers = {'Authorization': 'Bearer {}'.format(self.logged_in_admin())}
+        return headers
+    def get_user_headers(self):
+        headers = {'Authorization': 'Bearer {}'.format(self.logged_in_user())}
+        return headers
