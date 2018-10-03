@@ -37,7 +37,7 @@ def valid_name(name):
 def valid_description(desc):
     if not isinstance(desc, str):
         return False
-    matched = re.match("^[a-zA-Z][a-zA-Z ]{12,15}$", desc)
+    matched = re.match("^[a-zA-Z][a-zA-Z ]{12,}$", desc)
     if matched is None:
         return False
     return True
@@ -105,9 +105,11 @@ def normal_token_required(func):
     def decorated(*args, **kwargs):
         access_token = None
         try:
-            authorization_header = request.headers.get('Authorization')
-            if authorization_header:
-                access_token = authorization_header.split(' ')[1]
+            authorization_header = request.headers.get('Authorization', "")
+            authorization_header = authorization_header.split(" ")
+            if len(authorization_header) < 2:
+                return {"message": "Invalid authorization format use the format \'Bearer <TOKEN>\'"}, 400
+            access_token = authorization_header[1]
             if access_token:
                 decoded_token = decode_token(access_token)
                 print(decoded_token)
@@ -135,8 +137,10 @@ def admin_token_required(func):
         access_token = None
         try:
             authorization_header = request.headers.get('Authorization')
-            if authorization_header:
-                access_token = authorization_header.split(' ')[1]
+            authorization_header = authorization_header.split(" ")
+            if len(authorization_header) < 2:
+                return {"message": "Invalid authorization format use the format \'Bearer <TOKEN>\'"}, 400
+            access_token = authorization_header[1]
             if access_token:
                 decoded_token = decode_token(access_token)
                 user_id = decoded_token.get("id", None)
@@ -165,5 +169,5 @@ def decode_token(token):
                             algorithms=["HS256"])
         return claims
     except Exception as ex:
-        print(ex)
+        # print(ex)
         return {}
