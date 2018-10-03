@@ -103,17 +103,18 @@ class User(Base):
             if not record:
                 return None
             found = User(
-                username=record[1],
-                password=record[4],
-                email=record[3],
-                fullnames=record[2]
+                username=str(record[1]),
+                password=str(record[5]),
+                email=str(record[3]),
+                fullnames=str(record[2])
             )
             # print(found)
-            found.id = record[0]
-            found.password = record[4]
+            found.id = str(record[0])
+            found.password = str(record[5])
             return found
         except Exception as ex:
             # print("Some stupid error occurs here")
+            print(ex)
             return None
 
     def get_orders(self):
@@ -189,6 +190,13 @@ class Menu(Base):
             "price": str(self.price)
         }
 
+    @property
+    def json1(self):
+        return {
+            "name": self.name,
+            "description": self.description,
+            "price": str(self.price)
+        }
     @classmethod
     def find_by_id(cls, table_name="", meal_id="", token=None):
         menu_item = super(Menu, cls).find_by_id("meals", meal_id, token)
@@ -271,5 +279,5 @@ class Address(Base):
         address = super(Address, cls).find_by_id(
             table_name="addresses", ids=address_id)
         who_this_is = claims(token)
-        print(token)
+        # print(token)
         return address

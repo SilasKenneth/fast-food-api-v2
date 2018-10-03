@@ -37,7 +37,7 @@ def valid_name(name):
 def valid_description(desc):
     if not isinstance(desc, str):
         return False
-    matched = re.match("^[a-zA-Z][a-zA-Z ]{50,100}$", desc)
+    matched = re.match("^[a-zA-Z][a-zA-Z ]{12,15}$", desc)
     if matched is None:
         return False
     return True
@@ -78,7 +78,7 @@ def validate_username(username):
     """A validator to check if username requirements are met"""
     if not isinstance(username, str):
         return False
-    if len(username) < 6 or len(username) > 12:
+    if len(username) < 3 or len(username) > 12:
         return False
     else:
         ans = re.match(r'^[a-z|\s]+$', username)
@@ -90,9 +90,9 @@ def validate_username(username):
 def validate_fullname(names):
     if not isinstance(names, str):
         return False
-    if len(names) < 12 or len(names) > 50:
+    if len(names) < 6 or len(names) > 50:
         return False
-    ans = re.match(r'^[A-Z][a-z]{4,20} [A-Z][a-z]{4,20}$', names)
+    ans = re.match(r'^[A-Z][a-z]{2,20} [A-Z][a-z]{2,20}$', names)
     if ans is None:
         return False
     return True

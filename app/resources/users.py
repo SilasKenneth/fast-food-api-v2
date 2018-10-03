@@ -62,15 +62,14 @@ class LoginResource(Resource):
         username = args.get("username", "")
         password = args.get("password", "")
         user = User.get_by_username_or_email(username)
-        print(user)
         if user is None:
             return {"message": "Incorrect username or password provided"}, 403
+        print(user.password)
         if not check_password_hash(user.password, password):
             return {"message": "Incorrect username or password provided"}, 403
         payload = user.json
         key = current_app.config.get("JWT_SECRET_KEY")
-        token = jwt.encode(payload=payload, key=key)
-        token = token.decode("utf-8")
+        token = jwt.encode(payload=payload, key=key).decode("utf8")
         return {"message": "You successfully logged in", "token": str(token)}
 
 
