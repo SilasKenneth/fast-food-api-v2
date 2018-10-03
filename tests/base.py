@@ -21,7 +21,7 @@ class BaseTest(TestCase):
         }
         self.duplicate_meal = self.sample_meal
         self.meal_without_name = {
-            "name" : "",
+            "name": "",
             "description": "Some good food",
             "price": 200
         }
@@ -80,21 +80,23 @@ class BaseTest(TestCase):
             "username": "admin@gmail.com",
             "password": "Admin@123"
         }
+
     @classmethod
     def setUpClass(cls):
         cls.database = database
         cls.database.create_tables()
+
     @classmethod
     def tearDownClass(cls):
         cls.database.drop_tables()
+        # cls.database.create_tables()
+
     def logged_in_user(self):
-        response = self.client.post("/api/v2/auth/login", data=json.dumps(self.test_user), content_type="application/json")
+        response = self.client.post("/api/v2/auth/login", data=json.dumps(self.test_user_login),
+                                    content_type="application/json")
         response_obj = {}
         try:
             response_obj = json.loads(response.data)
         except Exception as ex:
             response_obj = {}
-        return response_obj.get(
-
-        )
-
+        return response_obj.get("token", "")
