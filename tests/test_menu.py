@@ -63,13 +63,13 @@ class TestMenu(BaseTest):
         response = self.client.post(self.MENU_URL, data=json.dumps(self.sample_meal), content_type="application/json")
         response_obj = toobj(response.data)
         self.assertNotEqual(response_obj, None)
-        self.assertEqual(response_obj.get("message", None), "An error occurred while decoding token.")
+        self.assertEqual(response_obj.get("message", None), "Invalid authorization format use the format 'Bearer <TOKEN>'")
         self.assertEqual(response.status_code, 400)
 
     def test_cannot_add_without_admin_token(self):
         response = self.client.post(self.MENU_URL, data=json.dumps(self.sample_meal), content_type="application/json",
-                                    headers=self.logged_in_user())
+                                    headers=self.get_user_headers())
         response_obj = toobj(response.data)
         self.assertNotEqual(response_obj, None)
-        self.assertEqual(response_obj.get("message", None), "An error occurred while decoding token.")
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response_obj.get("message", None), "Please login first, your session might have expired")
+        self.assertEqual(response.status_code, 401)
