@@ -9,7 +9,7 @@ class TestUsers(BaseTest):
                                     , content_type="application/json")
         response_obj = toobj(response.data)
         response_obj = {} if response_obj is None else response_obj
-        print(response_obj)
+        # print(response_obj)
         self.assertNotEqual(response.data, None)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response_obj.get("message", None), "You successfully signed up"
@@ -42,7 +42,7 @@ class TestUsers(BaseTest):
                                     , content_type="application/json")
         response_obj = toobj(response.data)
         response_obj = {} if response_obj is None else response_obj
-        print(response_obj)
+        # print(response_obj)
         self.assertNotEqual(response.data, None)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response_obj.get("message", None), "Please specify a valid username "
@@ -65,7 +65,7 @@ class TestUsers(BaseTest):
                                      , content_type="application/json")
         response_obj = toobj(response1.data)
         response_obj = {} if response_obj is None else response_obj
-        print(response_obj)
+        # print(response_obj)
         self.assertNotEqual(response1.data, None)
         self.assertEqual(response1.status_code, 200)
         self.assertEqual(response_obj.get("message", None), "You successfully logged in")
