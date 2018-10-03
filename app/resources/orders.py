@@ -12,18 +12,18 @@ from app.models import Order
 class OrderResource(Resource):
     """The class for the normal user orders endpoints"""
     parser = reqparse.RequestParser()
-    parser.add_argument("address", required=True, help="Please provide "
-                                                       "an address for delivery")
-    parser.add_argument("items", required=True, help="Please specify a comma separated list of"
-                                                     " items")
+    parser.add_argument("address", required=True, help="Please provide an address for delivery")
+    parser.add_argument("items", required=True, help="Please specify a comma separated list of items")
 
     @normal_token_required
     def post(self):
         """Create a new order"""
         args = self.parser.parse_args()
+        # import pdb;
+        # pdb.set_trace()
         address_id = args.get("address", "")
         items = args.get("items", "")
-        print(request.authorization)
+
         if empty(address_id) or empty(items):
             return {"message": "Please specify an address and a list of"
                                " items"}, 400
@@ -33,6 +33,7 @@ class OrderResource(Resource):
                                " please check your addresses and give a"
                                " valid id"}, 400
         items = items.split(",")
+
         ordered_items = []
         for item in items:
             item_object = Menu.find_by_id(meal_id=item)
@@ -92,7 +93,7 @@ class AdminOrderResource(Resource):
 
     @admin_token_required
     def put(self, order_id=None):
-        """Update the status of an order"""
+        """Update the status of an order by cancelling it"""
         if order_id is None:
             return {"message": "Missing order_id in your url"}, 400
         order = Order.find_by_id(ids=order_id)
