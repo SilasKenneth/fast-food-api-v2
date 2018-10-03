@@ -32,11 +32,11 @@ class MenuResource(Resource):
         if not valid_description(description):
             return {"message": "Please specify a valid description "
                                "for the item"}
-        menu_item = Menu(name, description, 200)
+        menu_item = Menu(name, description, price)
         saved = menu_item.save()
         if saved:
             return {"message": "The menu item was successfully saved", "data":
-                menu_item.json}, 201
+                menu_item.json1}, 201
         return {"message": "There was problem saving the item. Try again"}, 403
 
     @admin_token_required
