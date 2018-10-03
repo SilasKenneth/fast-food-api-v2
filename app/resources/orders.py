@@ -77,7 +77,10 @@ class AdminOrderResource(Resource):
     @admin_token_required
     def get(self, order_id=None):
         """Get all orders if order_id is None otherwise get a specific order"""
-        token = request.headers.get("")
+        token = request.headers.get("Authorization", "")
+        token = token.split(" ")
+        token = token[-1]
+        print(claims(token))
         if order_id is None:
             orders = Order.all()
             result = [order.json for order in orders]
