@@ -83,7 +83,7 @@ class Database(SQLs):
             self.cursor.execute(self.meal_sql)
             self.connection.commit()
         except psycopg2.Error as ex:
-            print(ex)
+            #print(ex)
             self.connection.rollback()
 
     def create_orders_table(self):
@@ -92,7 +92,7 @@ class Database(SQLs):
             self.cursor.execute(self.order_sql)
             self.connection.commit()
         except psycopg2.Error as ex:
-            print(ex)
+            #print(ex)
             self.connection.rollback()
 
     def create_order_products_table(self):
@@ -101,7 +101,7 @@ class Database(SQLs):
             self.cursor.execute(self.order_meals_sql)
             self.connection.commit()
         except psycopg2.Error as ex:
-            print(ex)
+            #print(ex)
             self.connection.rollback()
 
     def create_users_table(self):
@@ -110,7 +110,7 @@ class Database(SQLs):
             self.cursor.execute(self.users_sql)
             self.connection.commit()
         except psycopg2.Error as ex:
-            print(ex)
+            #print(ex)
             self.connection.rollback()
 
     def create_addresses_table(self):
@@ -122,7 +122,7 @@ class Database(SQLs):
             self.connection.commit()
             return True
         except psycopg2.Error as ex:
-            print(ex)
+            #print(ex)
             return False
 
     def create_tables(self):
@@ -150,7 +150,7 @@ class Database(SQLs):
             self.cursor.execute(drop_address_sql)
             self.connection.commit()
         except psycopg2.Error as ex:
-            print(ex)
+            #print(ex)
             self.connection.rollback()
 
     def create_default_admin(self, fullnames, username, email, password):
