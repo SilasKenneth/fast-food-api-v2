@@ -126,12 +126,14 @@ class Database(SQLs):
             drop_users_sql = "DROP TABLE if exists users cascade "
             drop_meals_sql = "DROP TABLE if exists meals cascade "
             drop_order_meals_sql = "DROP TABLE if exists order_meals cascade "
+            drop_address_sql = "DROP TABLE if exists addresses cascade "
             if self.connection is None:
                 return
             self.cursor.execute(drop_meals_sql)
             self.cursor.execute(drop_order_meals_sql)
             self.cursor.execute(drop_order_sql)
             self.cursor.execute(drop_users_sql)
+            self.cursor.execute(drop_address_sql)
             self.connection.commit()
         except psycopg2.Error as ex:
             print(ex)
