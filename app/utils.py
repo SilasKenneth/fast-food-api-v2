@@ -103,6 +103,8 @@ def normal_token_required(func):
 
     @wraps(func)
     def decorated(*args, **kwargs):
+        # import pdb;
+        # pdb.set_trace()
         access_token = None
         try:
             authorization_header = request.headers.get('Authorization', "")
@@ -122,10 +124,15 @@ def normal_token_required(func):
                     return {"message": "Invalid access token provided please login to view"
                                        " get a valid token"}, 401
                 return func(*args, **kwargs)
-            return {'message': "Please login first, your session might have expired"}, 401
-        except Exception as e:
-            return {'message': 'An error occured while decoding token.', 'error': str(e)}, 400
 
+            return {'message': "Please login first, your session might have expired"}, 401
+        except jwt.DecodeError as e:
+            # print(e)
+            return {'message': 'An error occurred while decoding token.', 'error': str(e)}, 400
+        except jwt.ExpiredSignature as e:
+            return {"message": "The token you provided token has expired please login again"}, 400
+        except jwt.InvalidTokenError as e:
+            return {"message": "There were other issues decoding the token please try to login again"}, 400
     return decorated
 
 
@@ -136,8 +143,9 @@ def admin_token_required(func):
     def decorated(*args, **kwargs):
         access_token = None
         try:
-            authorization_header = request.headers.get('Authorization')
+            authorization_header = request.headers.get('Authorization', "")
             authorization_header = authorization_header.split(" ")
+            print(authorization_header)
             if len(authorization_header) < 2:
                 return {"message": "Invalid authorization format use the format \'Bearer <TOKEN>\'"}, 400
             access_token = authorization_header[1]
@@ -150,14 +158,17 @@ def admin_token_required(func):
                     return {"message": "Invalid access token provided please login to view"
                                        " get a valid token"}, 401
                 if user_id is None or role is None:
-                    return {"message": "Invalid access token provided please login to view"
+                    return {"message": "Invalid access token provided please login to"
                                        " get a valid token"}, 401
                 return func(*args, **kwargs)
             return {'message': "Please login first, your session might have expired"}, 401
-        except Exception as e:
+        except jwt.DecodeError as e:
             # print(e)
             return {'message': 'An error occurred while decoding token.', 'error': str(e)}, 400
-
+        except jwt.ExpiredSignature as e:
+            return {"message": "The token you provided token has expired please login again"}, 400
+        except jwt.InvalidTokenError as e:
+            return {"message": "There were other issues decoding the token please try to login again"}, 400
     return decorated
 
 
