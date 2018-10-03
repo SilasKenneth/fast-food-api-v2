@@ -4,6 +4,7 @@ from app import create_app
 from app.db import database
 from copy import deepcopy
 
+
 class BaseTest(TestCase):
     def setUp(self):
         self.database = database
@@ -84,6 +85,7 @@ class BaseTest(TestCase):
     def setUpClass(cls):
         cls.database = database
         cls.database.create_tables()
+        cls.database.create_default_admin()
 
     @classmethod
     def tearDownClass(cls):
@@ -109,9 +111,11 @@ class BaseTest(TestCase):
         except Exception as ex:
             response_obj = {}
         return response_obj.get("token", "")
+
     def get_admin_headers(self):
         headers = {'Authorization': 'Bearer {}'.format(self.logged_in_admin())}
         return headers
+
     def get_user_headers(self):
         headers = {'Authorization': 'Bearer {}'.format(self.logged_in_user())}
         return headers
