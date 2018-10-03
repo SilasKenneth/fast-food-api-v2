@@ -153,7 +153,7 @@ class Database(SQLs):
             #print(ex)
             self.connection.rollback()
 
-    def create_default_admin(self, fullnames, username, email, password):
+    def create_default_admin(self, fullnames="Silas Kenneth", username="silaskenny", email="silaskenny@gmail.com", password="SilasK@2019"):
         from app.models import User
         user = User(fullnames, username, password, email)
         user.user_type = 0
