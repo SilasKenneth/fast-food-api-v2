@@ -98,6 +98,7 @@ class BaseTest(TestCase):
             response_obj = json.loads(response.data)
         except Exception as ex:
             response_obj = {}
+        # print(response_obj)
         return response_obj.get("token", "")
 
     def logged_in_admin(self):
@@ -107,8 +108,6 @@ class BaseTest(TestCase):
             response_obj = json.loads(response.data)
         except Exception as ex:
             response_obj = {}
-        print("Admin here")
-        token = response_obj.get("token", "")
         return response_obj.get("token", "")
     def get_admin_headers(self):
         headers = {'Authorization': 'Bearer {}'.format(self.logged_in_admin())}
