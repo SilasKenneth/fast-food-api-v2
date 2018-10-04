@@ -1,1 +1,2 @@
 [![Build Status](https://travis-ci.org/SilasKenneth/fast-food-api-v2.svg?branch=develop)](https://travis-ci.org/SilasKenneth/fast-food-api-v2.svg?branch=develop) 
+[![Coverage Status](https://coveralls.io/repos/github/SilasKenneth/fast-food-api-v2/badge.svg?branch=develop)](https://coveralls.io/github/SilasKenneth/fast-food-api-v2?branch=develop)
