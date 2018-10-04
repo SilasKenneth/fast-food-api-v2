@@ -85,10 +85,13 @@ class Database(SQLs):
             self.cursor = self.connection.cursor()
         else:
             self.connection = None
+            self.cursor = None
 
     def create_meals_table(self):
         """A method to create the meals table"""
         try:
+            if not self.cursor:
+                return
             self.cursor.execute(self.meal_sql)
             self.connection.commit()
         except (psycopg2.Error, Exception):
@@ -98,6 +101,8 @@ class Database(SQLs):
     def create_orders_table(self):
         """A method to create the orders table"""
         try:
+            if not self.cursor:
+                return
             self.cursor.execute(self.order_sql)
             self.connection.commit()
         except psycopg2.Error:
@@ -107,6 +112,8 @@ class Database(SQLs):
     def create_order_products_table(self):
         """A method to create the order_products table"""
         try:
+            if not self.cursor:
+                return
             self.cursor.execute(self.order_meals_sql)
             self.connection.commit()
         except (psycopg2.Error, Exception):
@@ -116,6 +123,8 @@ class Database(SQLs):
     def create_users_table(self):
         """A method to create the users table"""
         try:
+            if not self.cursor:
+                return
             self.cursor.execute(self.users_sql)
             self.connection.commit()
         except (Exception, psycopg2.Error):
