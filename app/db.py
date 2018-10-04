@@ -41,12 +41,14 @@ class SQLs(object):
                         );"""
         self.order_sql = """
                          CREATE TABLE if not exists orders(
-                         id SERIAL PRIMARY KEY, 
+                         id SERIAL PRIMARY KEY,
+                         reference varchar(100) not null,
                          user_id integer not null ,
                          date_ordered timestamp not null ,
                          address_id integer not null,
                          status varchar(20) not null,
                          cancelled boolean default false,
+                         unique(reference),
                          FOREIGN KEY(user_id) REFERENCES users(id) on update cascade,
                          FOREIGN KEY(address_id) REFERENCES addresses(id) on update cascade)
                          """
@@ -56,6 +58,7 @@ class SQLs(object):
                           meal_id integer not null,
                           order_id integer not null,
                           quantity integer not null,
+                          cost integer not null,
                           foreign key(order_id) REFERENCES orders(id) ON DELETE CASCADE on update cascade,
                           foreign key(meal_id) REFERENCES meals(id))
                            """
@@ -75,15 +78,18 @@ class Database(SQLs):
                                   database=self.database,
                                   user=self.username,
                                   password=self.password)
-        self.cursor = self.connection.cursor()
+        if self.connection:
+            self.cursor = self.connection.cursor()
+        else:
+            self.connection = None
 
     def create_meals_table(self):
         """A method to create the meals table"""
         try:
             self.cursor.execute(self.meal_sql)
             self.connection.commit()
-        except psycopg2.Error as ex:
-            #print(ex)
+        except psycopg2.Error:
+            # print(ex)
             self.connection.rollback()
 
     def create_orders_table(self):
@@ -91,8 +97,8 @@ class Database(SQLs):
         try:
             self.cursor.execute(self.order_sql)
             self.connection.commit()
-        except psycopg2.Error as ex:
-            #print(ex)
+        except psycopg2.Error:
+            # print(ex)
             self.connection.rollback()
 
     def create_order_products_table(self):
@@ -100,8 +106,8 @@ class Database(SQLs):
         try:
             self.cursor.execute(self.order_meals_sql)
             self.connection.commit()
-        except psycopg2.Error as ex:
-            #print(ex)
+        except psycopg2.Error:
+            # print(ex)
             self.connection.rollback()
 
     def create_users_table(self):
@@ -109,8 +115,8 @@ class Database(SQLs):
         try:
             self.cursor.execute(self.users_sql)
             self.connection.commit()
-        except psycopg2.Error as ex:
-            #print(ex)
+        except psycopg2.Error:
+            # print(ex)
             self.connection.rollback()
 
     def create_addresses_table(self):
@@ -121,8 +127,8 @@ class Database(SQLs):
             self.cursor.execute(self.address_sql)
             self.connection.commit()
             return True
-        except psycopg2.Error as ex:
-            #print(ex)
+        except psycopg2.Error:
+            # print(ex)
             return False
 
     def create_tables(self):
@@ -149,11 +155,13 @@ class Database(SQLs):
             self.cursor.execute(drop_users_sql)
             self.cursor.execute(drop_address_sql)
             self.connection.commit()
-        except psycopg2.Error as ex:
-            #print(ex)
+        except psycopg2.Error:
+            # print(ex)
             self.connection.rollback()
 
-    def create_default_admin(self, fullnames="Silas Kenneth", username="silaskenny", email="silaskenny@gmail.com", password="SilasK@2019"):
+    def create_default_admin(self, fullnames="Silas Kenneth", username="silaskenny", email="silaskenny@gmail.com",
+                             password="SilasK@2019"):
+        """Create the default user"""
         from app.models import User
         user = User(fullnames, username, password, email)
         user.user_type = 0
