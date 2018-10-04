@@ -1,0 +1,1 @@
+[![Build Status](https://travis-ci.org/SilasKenneth/fast-food-api-v2.svg?branch=develop)](https://travis-ci.org/SilasKenneth/fast-food-api-v2.svg?branch=develop) 
