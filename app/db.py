@@ -79,8 +79,9 @@ class Database(SQLs):
                                   database=self.database,
                                   user=self.username,
                                   password=self.password)
-        except Exception:
+        except Exception as ex:
             self.connection = None
+            print(ex)
         if self.connection:
             self.cursor = self.connection.cursor()
         else:
