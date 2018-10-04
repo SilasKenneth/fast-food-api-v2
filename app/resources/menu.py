@@ -1,4 +1,4 @@
-from flask_restful import Resource, reqparse
+from flask_restful import Resource, reqparse, request
 from app.models import Menu
 from app.utils import (empty,
                        valid_price,
@@ -9,6 +9,7 @@ from app.utils import (empty,
 
 
 class MenuResource(Resource):
+    """Menu item endpoints resource"""
     parser = reqparse.RequestParser()
     parser.add_argument("name", required=True, help="Please provide an item name")
     parser.add_argument("description", required=True, help="Please provide a description")
@@ -16,6 +17,7 @@ class MenuResource(Resource):
 
     @admin_token_required
     def post(self):
+        """Create a new menu item"""
         args = self.parser.parse_args()
         name = args.get("name", "")
         description = args.get("description", "")
@@ -41,7 +43,7 @@ class MenuResource(Resource):
 
     @admin_token_required
     def put(self, menu_id):
-
+        """Update a menu item"""
         menu = Menu.find_by_id(meal_id=menu_id)
         if menu is None:
             return {"message": "The menu item with an id number %s doesn't"
@@ -73,14 +75,19 @@ class MenuResource(Resource):
                                " maybe you provided a name already taken by"
                                " another menu item"}, 400
 
-    @admin_token_required
     def get(self, menu_id=None):
+        """Get either all menu items"""
+        token = request.headers.get("Authorization", "")
+        token = token.split(" ")
+        token = token[-1]
+        # print(claims(token))
         if menu_id is None:
             meals = Menu.all()
             return {"menu": meals}, 200
         if not isinstance(menu_id, str) and not isinstance(menu_id, int):
             return {"message": "The menu item with id %s does not exist" % menu_id}, 404
         meal = Menu.find_by_id(meal_id=menu_id)
+        print(meal)
         if not meal:
             return {"message": "The menu item with id %s does not exist" % menu_id}, 404
         return {"item": meal.json}
