@@ -254,7 +254,7 @@ class Order(Base):
         try:
             sql1 = "SELECT MAX(id) FROM orders"
             sql = "INSERT INTO orders(reference, user_id, date_ordered, address_id, status)VALUES" \
-                  " ('%s', '%s', now(), '%s' ,'%s')" % (
+                  " ('%s', '%s', now(), '%s' ,'%s') RETURNING id" % (
                       self.reference,
                       self.customer_id,
                       self.address,
@@ -275,8 +275,8 @@ class Order(Base):
                 self.cursor.execute(sql1)
                 nexter = self.cursor.fetchone()
                 num = nexter[0]
-            print(num, "Something here")
             num = (int(num) + 1) if (num != 1 or num is None) else num
+            self.id = num
             for item in self.items:
                 sql_individual = "INSERT INTO order_meals(meal_id, order_id, quantity, cost) VALUES ('%s', '%s', '%s', '%s')" % (
                     item.id,
