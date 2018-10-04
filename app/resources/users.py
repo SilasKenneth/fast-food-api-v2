@@ -1,13 +1,15 @@
-import os
-from flask_restful import Resource, reqparse
-from werkzeug.security import check_password_hash
+import datetime
+
 import jwt
 from flask import current_app
+from flask_restful import Resource, reqparse
+from werkzeug.security import check_password_hash
+
+from app.models import User
 from app.utils import (validate_username,
                        validate_password,
                        validate_email, empty,
                        validate_fullname)
-from app.models import User
 
 
 class SignUpResource(Resource):
@@ -67,6 +69,8 @@ class LoginResource(Resource):
         if not check_password_hash(user.password, password):
             return {"message": "Incorrect username or password provided"}, 403
         payload = user.json
+        payload['iat'] = datetime.datetime.utcnow()
+        payload['exp'] = datetime.datetime.utcnow() + datetime.timedelta(minutes=15)
         key = current_app.config.get("JWT_SECRET_KEY")
         token = jwt.encode(payload=payload, key=key).decode("utf8")
         return {"message": "You successfully logged in", "token": str(token)}
