@@ -73,11 +73,14 @@ class Database(SQLs):
         self.database = os.getenv("DB_FAST_FOOD_TEST", None)
         self.host = os.getenv("DB_HOST", None)
         self.password = os.getenv("DB_PASSWORD", None)
-        self.connection = connect(host=self.host,
+        try:
+            self.connection = connect(host=self.host,
                                   port=5432,
                                   database=self.database,
                                   user=self.username,
                                   password=self.password)
+        except Exception:
+            self.connection = None
         if self.connection:
             self.cursor = self.connection.cursor()
         else:
@@ -88,7 +91,7 @@ class Database(SQLs):
         try:
             self.cursor.execute(self.meal_sql)
             self.connection.commit()
-        except psycopg2.Error:
+        except (psycopg2.Error, Exception):
             # print(ex)
             self.connection.rollback()
 
@@ -106,7 +109,7 @@ class Database(SQLs):
         try:
             self.cursor.execute(self.order_meals_sql)
             self.connection.commit()
-        except psycopg2.Error:
+        except (psycopg2.Error, Exception):
             # print(ex)
             self.connection.rollback()
 
@@ -115,7 +118,7 @@ class Database(SQLs):
         try:
             self.cursor.execute(self.users_sql)
             self.connection.commit()
-        except psycopg2.Error:
+        except (Exception, psycopg2.Error):
             # print(ex)
             self.connection.rollback()
 
@@ -127,7 +130,7 @@ class Database(SQLs):
             self.cursor.execute(self.address_sql)
             self.connection.commit()
             return True
-        except psycopg2.Error:
+        except (psycopg2.Error, Exception):
             # print(ex)
             return False
 
@@ -155,7 +158,7 @@ class Database(SQLs):
             self.cursor.execute(drop_users_sql)
             self.cursor.execute(drop_address_sql)
             self.connection.commit()
-        except psycopg2.Error:
+        except (psycopg2.Error, Exception):
             # print(ex)
             self.connection.rollback()
 
