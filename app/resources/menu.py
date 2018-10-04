@@ -93,5 +93,5 @@ class MenuResource(Resource):
         return {"item": meal.json}
 
     @admin_token_required
-    def delete(self, meal_id):
+    def delete(self, meni_id=None):
         pass
