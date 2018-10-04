@@ -1,1 +1,1 @@
-web: python api_doc.py
+web: gunicorn --workers=1 run:app
