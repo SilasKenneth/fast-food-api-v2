@@ -49,7 +49,7 @@ class SignUpResource(Resource):
         saved = user.save()
         if not saved:
             return {"message": "The username or email is already in use"}, 400
-        return {"message": "You successfully signed up you can now login", "data": user.json}
+        return {"message": "You successfully signed up you can now login", "data": user.json1}
 
 
 class LoginResource(Resource):
@@ -64,7 +64,6 @@ class LoginResource(Resource):
         user = User.get_by_username_or_email(username)
         if user is None:
             return {"message": "Incorrect username or password provided"}, 403
-        print(user.password)
         if not check_password_hash(user.password, password):
             return {"message": "Incorrect username or password provided"}, 403
         payload = user.json
