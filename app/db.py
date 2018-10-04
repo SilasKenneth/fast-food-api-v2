@@ -5,7 +5,10 @@ from psycopg2 import connect
 
 
 class SQLs(object):
+    """A class to hold sql statements"""
+
     def __init__(self):
+        """Constructor for the SQL class"""
         self.users_sql = """
            CREATE TABLE if not exists users(
            id serial primary key , 
@@ -23,6 +26,7 @@ class SQLs(object):
            user_id integer not null,
            town varchar(60) not null,
            phone varchar(14) not null,
+           street varchar(60) not null,
            foreign key(user_id) references users(id) on delete cascade on update cascade
            )
         """
@@ -51,12 +55,15 @@ class SQLs(object):
                           id serial primary key, 
                           meal_id integer not null,
                           order_id integer not null,
+                          quantity integer not null,
                           foreign key(order_id) REFERENCES orders(id) ON DELETE CASCADE on update cascade,
                           foreign key(meal_id) REFERENCES meals(id))
                            """
 
 
 class Database(SQLs):
+    """The database class where everything creating schemas happen"""
+
     def __init__(self):
         super(Database, self).__init__()
         self.username = os.getenv("DB_USER", None)
@@ -71,6 +78,7 @@ class Database(SQLs):
         self.cursor = self.connection.cursor()
 
     def create_meals_table(self):
+        """A method to create the meals table"""
         try:
             self.cursor.execute(self.meal_sql)
             self.connection.commit()
@@ -79,6 +87,7 @@ class Database(SQLs):
             self.connection.rollback()
 
     def create_orders_table(self):
+        """A method to create the orders table"""
         try:
             self.cursor.execute(self.order_sql)
             self.connection.commit()
@@ -87,6 +96,7 @@ class Database(SQLs):
             self.connection.rollback()
 
     def create_order_products_table(self):
+        """A method to create the order_products table"""
         try:
             self.cursor.execute(self.order_meals_sql)
             self.connection.commit()
@@ -95,6 +105,7 @@ class Database(SQLs):
             self.connection.rollback()
 
     def create_users_table(self):
+        """A method to create the users table"""
         try:
             self.cursor.execute(self.users_sql)
             self.connection.commit()
@@ -103,6 +114,7 @@ class Database(SQLs):
             self.connection.rollback()
 
     def create_addresses_table(self):
+        """A method to create the addresses table"""
         if self.connection is None:
             return False
         try:
@@ -114,6 +126,7 @@ class Database(SQLs):
             return False
 
     def create_tables(self):
+        """A method to call all methods creating tables"""
         self.create_users_table()
         self.create_addresses_table()
         self.create_meals_table()
@@ -121,6 +134,7 @@ class Database(SQLs):
         self.create_order_products_table()
 
     def drop_tables(self):
+        """A method to drop all tables"""
         try:
             drop_order_sql = "DROP TABLE if exists orders CASCADE"
             drop_users_sql = "DROP TABLE if exists users cascade "
@@ -138,6 +152,12 @@ class Database(SQLs):
         except psycopg2.Error as ex:
             print(ex)
             self.connection.rollback()
+
+    def create_default_admin(self, fullnames, username, email, password):
+        from app.models import User
+        user = User(fullnames, username, password, email)
+        user.user_type = 0
+        user.save()
 
 
 database = Database()
