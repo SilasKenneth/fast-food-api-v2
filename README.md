@@ -1,3 +1,6 @@
+### FAST FOOD FAST
+Fast-Food-Fast is a food delivery service app for a restaurant. and this is the API(backed) for the app
+
 [![Build Status](https://travis-ci.org/SilasKenneth/fast-food-api-v2.svg?branch=develop)](https://travis-ci.org/SilasKenneth/fast-food-api-v2.svg?branch=develop) 
 [![Coverage Status](https://coveralls.io/repos/github/SilasKenneth/fast-food-api-v2/badge.svg?branch=develop)](https://coveralls.io/github/SilasKenneth/fast-food-api-v2?branch=develop)
 [![Maintainability](https://api.codeclimate.com/v1/badges/c7730ab0e1ca3f6df6fb/maintainability)](https://codeclimate.com/github/SilasKenneth/fast-food-api-v2/maintainability)
