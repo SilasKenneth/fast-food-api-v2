@@ -32,7 +32,10 @@ class Base(object):
     @classmethod
     def find_by_id(cls, table_name, ids, token=None):
         try:
-            sql = "SELECT * FROM %s WHERE id = '%s'" % (table_name, ids)
+            if not str(ids).isnumeric():
+                return []
+            ids = int(ids)
+            sql = "SELECT * FROM %s WHERE id = %d" % (table_name, ids)
             if cls.conn is None:
                 return []
             cls.cursor.execute(sql)
@@ -54,7 +57,7 @@ class User(Base):
         self.password = generate_password_hash(password)
         self.addresses = []
         self.orders = []
-        self.user_type = 0
+        self.user_type = 1
 
     def save(self):
         try:
@@ -62,12 +65,14 @@ class User(Base):
             username = self.username
             password = self.password
             email = self.email
-            sql = "INSERT INTO users(fullnames, username, email, password)values('%s', '%s', '%s', '%s')" % \
+            user_type = self.user_type
+            sql = "INSERT INTO users(fullnames, username, email, password, user_type)values('%s', '%s', '%s', '%s', '%s')" % \
                   (
                       fullnames,
                       username,
                       email,
-                      password
+                      password,
+                      user_type
                   )
             if self.conn is None:
                 return False
@@ -81,8 +86,18 @@ class User(Base):
 
     @property
     def json(self):
+        """Make the user object JSON serializable"""
         return {
             "id": self.id,
+            "fullnames": self.fullnames,
+            "username": self.username,
+            "email": self.email,
+            "user_type": "admin" if self.user_type == '0' else "normal"
+        }
+    @property
+    def json1(self):
+        """Remove the id field from the serializable version"""
+        return {
             "fullnames": self.fullnames,
             "username": self.username,
             "email": self.email,
@@ -91,6 +106,7 @@ class User(Base):
 
     @classmethod
     def get_by_username_or_email(cls, username):
+        """Get a user by email or username"""
         try:
             sql = "SELECT * FROM users WHERE username = '%s' or email = '%s'" % (
                 username,
@@ -111,6 +127,7 @@ class User(Base):
             # print(found)
             found.id = str(record[0])
             found.password = str(record[5])
+            found.user_type = str(record[4])
             return found
         except Exception as ex:
             # print("Some stupid error occurs here")
@@ -161,13 +178,6 @@ class Menu(Base):
             return False
 
     @classmethod
-    def get_by_id(cls, meal_id):
-        try:
-            pass
-        except Exception as ex:
-            pass
-
-    @classmethod
     def format(cls, menu):
         menus = Menu(menu[1], menu[2], menu[3])
         menus.id = menu[0]
@@ -197,8 +207,10 @@ class Menu(Base):
             "description": self.description,
             "price": str(self.price)
         }
+
     @classmethod
     def find_by_id(cls, table_name="", meal_id="", token=None):
+        """Find a meal by a meal_id"""
         menu_item = super(Menu, cls).find_by_id("meals", meal_id, token)
         if not menu_item:
             return None
@@ -223,7 +235,9 @@ class Menu(Base):
 
 
 class Order(Base):
+    """The order class which represents an order"""
     def __init__(self, customer_id, address_id, items):
+        """Constructor for the Order class"""
         super(Order, self).__init__()
         self.id = None
         self.reference = uuid.uuid4()
@@ -233,7 +247,7 @@ class Order(Base):
         self.date_ordered = datetime.datetime.utcnow()
         self.status = "pending"
 
-    def save(self, token=None):
+    def save(self):
         try:
             sql = "INSERT INTO orders(reference, customer_id, date_ordered, status)VALUES" \
                   " ('%s', '%s', '%s', '%s')" % (
@@ -245,24 +259,55 @@ class Order(Base):
             if self.conn is None:
                 return False
             self.cursor.execute(sql)
+            nexter = self.next_id()
+            for item in self.items:
+                sql_indivi = "INSERT INTO order_meals(meal_id, order_id) VALUES ('%s', '%s')" % (
+                    item.id,
+                    nexter
+                )
+                self.cursor.execute(sql_indivi)
             self.conn.commit()
         except Exception as ex:
             self.conn.rollback()
             return False
 
     @classmethod
-    def all(cls, table="orders"):
+    def all(cls, table="orders", token=""):
         records = super(Order, cls).all(table)
-        if not records:
+        who = claims(token)
+        if not who:
             return []
-        return []
+        res = []
+        if who.get("user_type", "") == "admin":
+            return records
+        for record in records:
+            if record[1] == who.get("id", 0):
+                res.append(record)
+        if not res:
+            return []
+        print(res)
+        return res
 
     @classmethod
-    def find_by_id(cls, table_name="orders", ids=None, token=None):
+    def find_by_id(cls, table_name="orders", ids="", token=""):
         order = super(Order, cls).find_by_id(table_name, ids, token)
         if not order:
             return {}
         return {}
+
+    @classmethod
+    def next_id(cls):
+        try:
+            sql = "SELECT nextval(id) FROM users"
+            if cls.conn is None:
+                return 1
+            cls.cursor.execute(sql)
+            res = cls.cursor.fetchone()
+            if not res:
+                return 1
+            return res[0]
+        except Exception as ex:
+            return 1
 
 
 class Address(Base):
@@ -275,9 +320,23 @@ class Address(Base):
         self.user_id = None
 
     @classmethod
-    def get_by_id(cls, address_id="", token=None):
+    def find_by_id(cls, table_name="addresses", address_id="", token=None):
         address = super(Address, cls).find_by_id(
-            table_name="addresses", ids=address_id)
+            table_name="addresses", ids=address_id, token=token)
         who_this_is = claims(token)
-        # print(token)
         return address
+    def save(self, token=""):
+        """Save the address to the database"""
+        try:
+            sql = "INSERT INTO addresses(user_id, town, phone, street)values('%s', '%s', '%s')"%(
+                self.user_id,
+                self.town,
+                self.phone,
+                self.street
+            )
+            if self.conn is None:
+                return False
+            self.cursor.execute(sql)
+
+        except Exception as ex:
+            return False
