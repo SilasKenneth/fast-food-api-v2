@@ -83,14 +83,16 @@ class MenuResource(Resource):
         # print(claims(token))
         if menu_id is None:
             meals = Menu.all()
-            return {"menu": meals}, 200
+            if not meals:
+                return {"message": "No menu items are currently available. Check on later"}, 404
+            return {"message": "success", "menu": meals}, 200
         if not isinstance(menu_id, str) and not isinstance(menu_id, int):
             return {"message": "The menu item with id %s does not exist" % menu_id}, 404
         meal = Menu.find_by_id(meal_id=menu_id)
         print(meal)
         if not meal:
             return {"message": "The menu item with id %s does not exist" % menu_id}, 404
-        return {"item": meal.json}
+        return {"message": "success", "item": meal.json}
 
     @admin_token_required
     def delete(self, meni_id=None):
