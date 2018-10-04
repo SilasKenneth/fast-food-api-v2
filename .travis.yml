@@ -1,14 +1,24 @@
 language: python
 python:
   - "3.6"
+
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
 env:
   - DB_NAME=testdb DB_USER=postgres DB_PASSWORD= DB_HOST=localhost SECRET_KEY=secretkey JWT_SECRET_KEY=secretkey APP_SETTINGS=testing
 install:
   - pip install -r requirements.txt
+
+script:
+  - python -m pytest --cov=app/
 services:
   - postgresql
-before_script:
-  - createdb testdb;
-script:
-  - python -m pytest --cov=app --cov-report=term-missing
 
+after_script:
+  - coverage xml
+  - if [[ "$TRAVIS_PULL_REQUEST" == "false" && "$TRAVIS_PYTHON_VERSION" == "3.6" ]]; then ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT; fi
+
+after_success:
+  - coveralls
