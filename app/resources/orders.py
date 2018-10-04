@@ -7,10 +7,10 @@ from app.utils import (admin_token_required,
                        empty)
 
 from app.models import Order
-from app.utils import admin_token_required
 
 
 class OrderResource(Resource):
+    """The class for the normal user orders endpoints"""
     parser = reqparse.RequestParser()
     parser.add_argument("address", required=True, help="Please provide "
                                                        "an address for delivery")
@@ -19,15 +19,16 @@ class OrderResource(Resource):
 
     @normal_token_required
     def post(self):
-        print(request.authorization)
+        """Create a new order"""
         args = self.parser.parse_args()
         address_id = args.get("address", "")
         items = args.get("items", "")
+        print(request.authorization)
         if empty(address_id) or empty(items):
             return {"message": "Please specify an address and a list of"
                                " items"}, 400
         address = Address.find_by_id(address_id=address_id)
-        if not address:
+        if not address or len(address) == 0:
             return {"message": "The address you provided is not valid"
                                " please check your addresses and give a"
                                " valid id"}, 400
@@ -45,13 +46,29 @@ class OrderResource(Resource):
 
     @normal_token_required
     def get(self, order_id=None):
+        """Get orders if not order_id is provided otherwise get a given order if it belongs to the user"""
         if order_id is None:
-            return Order.all()
-        return Order.find_by_id(ids=order_id)
+            orders = Order.all()
+            if not orders:
+                return {"message": "You don't currently have any orders"}, 404
+        order = Order.find_by_id(ids=order_id)
+        return order.json
 
     @normal_token_required
     def put(self, order_id=None):
-        pass
+        """Update the status of an order"""
+        if order_id is None:
+            return {"message": "There was no order id provided in the url"}, 400
+        order = Order.find_by_id(ids=order_id)
+        if not order:
+            return {"message": "The order with id %s doesn't exist"%order_id}, 404
+        if order.status.lower() != "new":
+            return {"message": "The order you are trying to cancel cannot be cancelled at the stage it "
+                               "is currently at"}, 400
+        cancelled = order.cancel()
+        if cancelled:
+            return {"message": "The order was successfully cancelled", "data": order.json}, 400
+        return {"message": "There was a problem cancelling the order"}, 400
 
 
 class AdminOrderResource(Resource):
@@ -60,6 +77,7 @@ class AdminOrderResource(Resource):
     @admin_token_required
     def get(self, order_id=None):
         """Get all orders if order_id is None otherwise get a specific order"""
+        token = request.headers.get("")
         if order_id is None:
             orders = Order.all()
             result = [order.json for order in orders]
@@ -78,5 +96,4 @@ class AdminOrderResource(Resource):
         if order is None:
             return {"message": "The order with order_id %s was not "
                                "found" % order_id}, 404
-
         return order
