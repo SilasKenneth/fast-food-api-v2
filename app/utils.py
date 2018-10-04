@@ -5,6 +5,19 @@ import jwt
 from flask import request, current_app
 
 
+def validate_phone(phone):
+    if not isinstance(phone, str):
+        return False
+    if len(phone) < 10:
+        return False
+    if phone[0:2] != '07':
+        return False
+    valid = re.match('^07[0-9]{8,8}$', phone)
+    if not valid:
+        return False
+    return True
+
+
 def empty(value):
     if not isinstance(value, str):
         return True
@@ -118,21 +131,24 @@ def normal_token_required(func):
                 user_id = decoded_token.get("id", None)
                 role = decoded_token.get("user_type", None)
                 if role != "normal":
-                    return {"message": "Invalid access token provided please login to view"
-                                       " get a valid token"}, 401
+                    return {"message": "Invalid access token provided please login to"
+                                       " get a new valid token"}, 401
                 if user_id is None:
                     return {"message": "Invalid access token provided please login to view"
                                        " get a valid token"}, 401
                 return func(*args, **kwargs)
 
             return {'message': "Please login first, your session might have expired"}, 401
-        except jwt.DecodeError as e:
+        except jwt.DecodeError as ex:
             # print(e)
-            return {'message': 'An error occurred while decoding token.', 'error': str(e)}, 400
-        except jwt.ExpiredSignature as e:
-            return {"message": "The token you provided token has expired please login again"}, 400
-        except jwt.InvalidTokenError as e:
-            return {"message": "There were other issues decoding the token please try to login again"}, 400
+            return {'message': 'An error occurred while decoding token.', 'error': str(ex)}, 400
+        except jwt.ExpiredSignature as ex:
+            return {"message": "The token you provided token has expired please login again",
+                    "error": str(ex)}, 400
+        except jwt.InvalidTokenError as ex:
+            return {"message": "There were other issues decoding the token please try to "
+                               "login again", "error": str(ex)}, 400
+
     return decorated
 
 
@@ -162,13 +178,14 @@ def admin_token_required(func):
                                        " get a valid token"}, 401
                 return func(*args, **kwargs)
             return {'message': "Please login first, your session might have expired"}, 401
-        except jwt.DecodeError as e:
+        except jwt.DecodeError as ex:
             # print(e)
-            return {'message': 'An error occurred while decoding token.', 'error': str(e)}, 400
-        except jwt.ExpiredSignature as e:
-            return {"message": "The token you provided token has expired please login again"}, 400
-        except jwt.InvalidTokenError as e:
-            return {"message": "There were other issues decoding the token please try to login again"}, 400
+            return {'message': 'An error occurred while decoding token.', 'error': str(ex)}, 400
+        except jwt.ExpiredSignature as ex:
+            return {"message": "The token you provided token has expired please login again", "error": str(ex)}, 400
+        except jwt.InvalidTokenError as ex:
+            return {"message": "There were other issues decoding the token please try to login again", "error": str(ex)}, 400
+
     return decorated
 
 
