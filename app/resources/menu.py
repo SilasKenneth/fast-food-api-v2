@@ -77,10 +77,6 @@ class MenuResource(Resource):
 
     def get(self, menu_id=None):
         """Get either all menu items"""
-        token = request.headers.get("Authorization", "")
-        token = token.split(" ")
-        token = token[-1]
-        # print(claims(token))
         if menu_id is None:
             meals = Menu.all()
             if not meals:

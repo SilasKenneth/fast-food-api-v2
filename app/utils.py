@@ -199,3 +199,7 @@ def decode_token(token):
     except Exception as ex:
         # print(ex)
         return {}
+
+def get_details_from_token(decoder):
+    token = request.headers.get("Authorization", "").split(" ")
+    return decoder(token[1])
