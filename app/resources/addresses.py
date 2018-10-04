@@ -4,7 +4,8 @@ from app.models import Address
 from app.utils import (normal_token_required,
                        empty,
                        validate_phone,
-                       decode_token as claims)
+                       decode_token as claims,
+                       get_details_from_token)
 
 
 class AddressResource(Resource):
@@ -15,12 +16,7 @@ class AddressResource(Resource):
 
     @normal_token_required
     def get(self, address_id=None):
-        token = request.headers.get("Authorization", "")
-        token = token.split(" ")
-        if len(token) < 2:
-            return {"message": "You could not be verified please login and try again"}, 403
-        token = token[1]
-        user_id = claims(token).get("id", "0")
+        user_id = get_details_from_token(claims).get("id", "0")
         if address_id is None:
             addresses = Address.all(user_id=user_id)
             if not addresses:
@@ -36,13 +32,7 @@ class AddressResource(Resource):
 
     @normal_token_required
     def post(self):
-        token = request.headers.get("Authorization", "")
-        token = token.split(" ")
-        if len(token) < 2:
-            return {"message": "You could not be verified please login and try again"}, 403
-        token = token[1]
-        details = claims(token)
-        print(details)
+        details = get_details_from_token(claims)
         args = self.parser.parse_args()
         town = args.get("town", "")
         street = args.get("street", "")

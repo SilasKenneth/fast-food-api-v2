@@ -4,7 +4,8 @@ from app.models import Order, Address, Menu
 from app.utils import (admin_token_required,
                        normal_token_required,
                        decode_token as claims,
-                       empty)
+                       empty,
+                       get_details_from_token as details)
 
 from app.models import Order
 
@@ -21,13 +22,7 @@ class OrderResource(Resource):
         args = self.parser.parse_args()
         address_id = args.get("address", "")
         items = args.get("items", "")
-        token = request.headers.get("Authorization", "")
-        token = token.split(" ")
-        if len(token) < 2:
-            return {"message": "You could not be verified please login and try again"}, 403
-        token = token[1]
-        customer_id = claims(token).get("id", "0")
-        print(claims(token))
+        customer_id = details(claims).get("id", "0")
         if empty(address_id) or empty(items):
             return {"message": "Please specify an address and a list of"
                                " items"}, 400
@@ -61,12 +56,7 @@ class OrderResource(Resource):
     @normal_token_required
     def get(self, order_id=None):
         """Get orders if not order_id is provided otherwise get a given order if it belongs to the user"""
-        token = request.headers.get("Authorization", "")
-        token = token.split(" ")
-        if len(token) < 2:
-            return {"message": "You could not be verified please login and try again"}, 403
-        token = token[1]
-        customer_id = claims(token).get("id", "0")
+        customer_id = details(claims).get("id", "")
         if order_id is None:
             orders = Order.all(user_id=customer_id, user_type=1)
             if not orders:
@@ -104,15 +94,12 @@ class AdminOrderResource(Resource):
     @admin_token_required
     def get(self, order_id=None):
         """Get all orders if order_id is None otherwise get a specific order"""
-        token = request.headers.get("Authorization", "")
-        token = token.split(" ")
-        token = token[-1]
-        details = claims(token)
+        details1 = details(claims)
         if order_id is None:
             orders = Order.all()
             result = [order.json for order in orders]
             return {"message": "success", "orders": result}, 200
-        order_current = Order.find_by_id(ids=order_id, user_id=details.get("id", "1"))
+        order_current = Order.find_by_id(ids=order_id, user_id=details1.get("id", "1"))
         if not order_current:
             return {"message": "The order with id %s is not available" % order_id}, 404
         return order_current.json1
