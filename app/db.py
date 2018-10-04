@@ -70,12 +70,13 @@ class Database(SQLs):
     def __init__(self):
         super(Database, self).__init__()
         self.username = os.getenv("DB_USER", None)
-        self.database = os.getenv("DB_FAST_FOOD_TEST", None)
+        self.database = os.getenv("DB_NAME", None)
         self.host = os.getenv("DB_HOST", None)
+        self.port = os.getenv("DB_PORT", 5432)
         self.password = os.getenv("DB_PASSWORD", None)
         try:
             self.connection = connect(host=self.host,
-                                  port=5432,
+                                  port=self.DB_PORT,
                                   database=self.database,
                                   user=self.username,
                                   password=self.password)
