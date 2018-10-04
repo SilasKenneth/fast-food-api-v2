@@ -2,7 +2,7 @@ language: python
 python:
   - "3.6"
 env:
-  - DB_NAME=testdb DB_USER=postgres DB_PASSWORD= DB_HOST=localhost
+  - DB_NAME=testdb DB_USER=postgres DB_PASSWORD= DB_HOST=localhost SECRET_KEY=secretkey JWT_SECRET_KEY=secretkey APP_SETTINGS=testing
 install:
   - pip install -r requirements.txt
 services:

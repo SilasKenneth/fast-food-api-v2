@@ -1,13 +1,15 @@
-import os
-import uuid
+import datetime
+
+import jwt
+from flask import current_app
 from flask_restful import Resource, reqparse
 from werkzeug.security import check_password_hash
-import jwt
+
+from app.models import User
 from app.utils import (validate_username,
                        validate_password,
                        validate_email, empty,
                        validate_fullname)
-from app.models import User
 
 
 class SignUpResource(Resource):
@@ -49,7 +51,7 @@ class SignUpResource(Resource):
         saved = user.save()
         if not saved:
             return {"message": "The username or email is already in use"}, 400
-        return {"message": "You successfully signed up you can now login", "data": user.json}
+        return {"message": "You successfully signed up you can now login", "data": user.json1}
 
 
 class LoginResource(Resource):
@@ -67,10 +69,10 @@ class LoginResource(Resource):
         if not check_password_hash(user.password, password):
             return {"message": "Incorrect username or password provided"}, 403
         payload = user.json
-        key = os.getenv("JWT_SECRET_KEY", None)
-        if key is None:
-            os.putenv("JWT_SECRET_KEY", str(uuid.uuid4()))
-        token = jwt.encode(payload=payload, key=os.getenv("JWT_SECRET_KEY", "SomeKey")).decode("utf8")
+        payload['iat'] = datetime.datetime.utcnow()
+        payload['exp'] = datetime.datetime.utcnow() + datetime.timedelta(minutes=15)
+        key = current_app.config.get("JWT_SECRET_KEY")
+        token = jwt.encode(payload=payload, key=key).decode("utf8")
         return {"message": "You successfully logged in", "token": str(token)}
 
 
