@@ -76,10 +76,10 @@ class Database(SQLs):
         self.password = os.getenv("DB_PASSWORD", None)
         try:
             self.connection = connect(host=self.host,
-                                  port=self.DB_PORT,
-                                  database=self.database,
-                                  user=self.username,
-                                  password=self.password)
+                                      port=self.port,
+                                      database=self.database,
+                                      user=self.username,
+                                      password=self.password)
         except Exception as ex:
             self.connection = None
             print(ex)
