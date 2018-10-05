@@ -27,7 +27,7 @@ class OrderResource(Resource):
             return {"message": "Please specify an address and a list of"
                                " items"}, 400
         address = Address.find_by_id(address_id=address_id, user_id=customer_id)
-        if not address or len(address) == 0:
+        if not address:
             return {"message": "The address you provided is not valid"
                                " please check your addresses and give a"
                                " valid id"}, 400

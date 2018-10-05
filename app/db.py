@@ -70,7 +70,7 @@ class Database(SQLs):
     def __init__(self):
         super(Database, self).__init__()
         self.username = os.getenv("DB_USER", None)
-        self.database = os.getenv("DB_NAME", "fast_food")
+        self.database = os.getenv("DB_NAME", "testdb")
         self.host = os.getenv("DB_HOST", None)
         self.port = os.getenv("DB_PORT", 5432)
         self.password = os.getenv("DB_PASSWORD", None)

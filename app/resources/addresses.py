@@ -22,8 +22,8 @@ class AddressResource(Resource):
             if not addresses:
                 return {"message": "You currently don't have any addresses. Add one first"}, 404
             res = [address.json1 for address in addresses]
-            return {"message":"success", "addresses":res}, 200
-        address = Address.find_by_id(user_id=user_id)
+            return {"message": "success", "addresses": res}, 200
+        address = Address.find_by_id(user_id=user_id, address_id=address_id)
         if not address:
             return {"message": "The address with id %s was not found in your addresses" % (
                 address_id
@@ -46,5 +46,5 @@ class AddressResource(Resource):
             return {"message": "We could not verify your token please try again"}, 403
         saved = address.save(user_id=details.get("id", ""))
         if saved:
-            return {"message": "The address was successfully saved", "data": address.json}, 200
+            return {"message": "The address was successfully saved", "data": address.json}, 201
         return {"message": "There was a problem saving the address to the database"}, 400

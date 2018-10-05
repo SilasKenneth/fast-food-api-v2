@@ -13,6 +13,8 @@ class BaseTest(TestCase):
         self.MENU_URL = "/api/v2/menu"
         self.ORDER_URL = "/api/v2/orders"
         self.AUTH_URL = "/api/v2/auth/"
+        self.USER_ORDER_URL = "/api/v2/users/orders"
+        self.ADDRESS_URL = "/api/v2/addresses"
         self.sample_meal = {
             "name": "Soda na chips",
             "description": "This is menu item"
@@ -80,12 +82,38 @@ class BaseTest(TestCase):
             "username": "silaskenny",
             "password": "SilasK@2019"
         }
+        self.address_test = {
+            "town": "Mombasa",
+            "street": "Mpeketoni",
+            "phone": "0707885973"
+        }
+        self.address_invalid_phone = {
+            "town": "Nairobi",
+            "street": "Jogoo Road",
+            "phone": "07082727"
+        }
+
+        self.order_valid = {
+            "address": "1",
+            "items": "1,1,1,1,1,1",
+        }
+        self.order_nonexistent_product = {
+            "address": "1",
+            "items": "1,100,10,1"
+        }
+        self.order_invalid_address = {
+            "address": "h",
+            "items": "1,1,1,1,1"
+        }
+
+        self.order_non_existent_address = {
+            "address": '1',
+            "items": '1,1,1,1,1,1'
+        }
 
     @classmethod
     def setUpClass(cls):
         cls.database = database
-        cls.database.create_tables()
-        cls.database.create_default_admin()
 
     @classmethod
     def tearDownClass(cls):
@@ -93,11 +121,18 @@ class BaseTest(TestCase):
         cls.database.create_tables()
         cls.database.create_default_admin()
 
+    def create_test_user(self):
+        response = self.client.post(self.AUTH_URL + "signup",
+                                    data=json.dumps(self.test_user),
+                                    content_type="application/json")
+
     def logged_in_user(self):
+        self.create_test_user()
         response = self.client.post("/api/v2/auth/login", data=json.dumps(self.test_user_login),
                                     content_type="application/json")
         try:
             response_obj = json.loads(response.data)
+            # print(response_obj)
         except Exception as ex:
             response_obj = {}
         # print(response_obj)

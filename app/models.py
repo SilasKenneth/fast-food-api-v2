@@ -23,9 +23,7 @@ class Base(object):
             cls.cursor.execute(sql)
             records = cls.cursor.fetchall()
             return records
-        except psycopg2.Error:
-            # print(ex)
-            cls.conn.rollback()
+        except (psycopg2.Error, Exception):
             return []
 
     @classmethod
@@ -288,7 +286,7 @@ class Order(Base):
             self.conn.commit()
             return True
         except psycopg2.Error as ex:
-            print(ex)
+            #print(ex)
             self.conn.rollback()
             return False
 
@@ -300,7 +298,7 @@ class Order(Base):
             order_gotten.date_ordered = order[3]
             order_gotten.id = order[0]
             order_gotten.total = cls.get_total(order_gotten.id)
-            print(order_gotten.id)
+            #print(order_gotten.id)
             return order_gotten
         except IndexError:
             return None
@@ -398,7 +396,7 @@ class Order(Base):
                 res.append(cls.format_menu_order(item))
             return res
         except Exception as ex:
-            print(ex)
+            #print(ex)
             return []
 
     @classmethod
@@ -424,16 +422,19 @@ class Address(Base):
     def find_by_id(cls, table_name="addresses", address_id="", user_id=""):
         """Find an address by a given if"""
         address = super(Address, cls).find_by_id(
-            table_name="addresses", ids=address_id)
+            table_name="addresses", ids=address_id, user_id=user_id)
         if not address:
             return []
         new_add = cls.format(address)
-        if new_add is None:
-            return []
         print(new_add)
-        if int(new_add.user_id) != int(user_id):
+        if new_add is None:
+            import pdb;pdb.set_trace()
             return []
-        return address
+        #print(new_add)
+        if int(new_add.user_id) != int(user_id):
+            print("So what")
+            return []
+        return new_add
 
     def save(self, user_id=""):
         """Save the address to the database"""
