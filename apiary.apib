@@ -13,12 +13,12 @@ Polls is a simple API allowing consumers to view polls and vote in them.
 
         [
             {
-                "question": "Favourite programming language?",
-                "published_at": "2015-08-05T08:40:51.620Z",
-                "choices": [
+                "message": "success",
+                "data": [
                     {
-                        "choice": "Swift",
-                        "votes": 2048
+                        "meal_id": "1",
+                        "name": "Chapati ndengu",
+                        "description": "Some good chaps for the rest"
                     }, {
                         "choice": "Python",
                         "votes": 1024
@@ -33,29 +33,20 @@ Polls is a simple API allowing consumers to view polls and vote in them.
             }
         ]
 
-### Create a New Question [POST]
+### Create a new menu item [POST]
 
-You may create your own question using this action. It takes a JSON
-object containing a question and a collection of answers in the
-form of choices.
+You may create a menu item here if you're an admin user. It takes a JSON object
+containing the name, description and the price.
 
 + Request (application/json)
 
         {
-            "question": "Favourite programming language?",
-            "choices": [
-                "Swift",
-                "Python",
-                "Objective-C",
-                "Ruby"
-            ]
+            "name": "Kuku Fry",
+            "description": "Some good Kuku choma",
+            "price": "200"
         }
 
 + Response 201 (application/json)
-
-    + Headers
-
-            Location: /questions/2
 
     + Body
 
@@ -78,3 +69,13 @@ form of choices.
                     }
                 ]
             }
+## The User Login Collection [/auth/signup]
+### Login into your account [POST]
+After creating an account you may want to log in and place some orders or just order some items
+from the API. It takes JSON object containing
++ Response 200 (application/json)
+    {
+        "message": "You successfully logged in",
+        "token": 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6IjMiLCJmdWxsbmFtZXMiOiJTaWxhcyBLZW5uZXRoIiwidXNlcm5hbWUiOiJzaWxhc2tlbm4iLCJlbWFpbCI6InNpbGFza2VubkBnbWFpbC5jb20iLCJ1c2VyX3R5cGUiOiJub3JtYWwiLCJpYXQiOjE1Mzg2ODM1NzAsImV4cCI6MTUzODY4NDQ3MH0.pXjFs5SmGPao4Y-FT_JJDb4yL3Q2btR6O8g5PCp6rnQ'
+    }
+## The User Sign Up Collection[/auth/signup]

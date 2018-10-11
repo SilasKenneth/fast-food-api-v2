@@ -127,7 +127,7 @@ def normal_token_required(func):
             access_token = authorization_header[1]
             if access_token:
                 decoded_token = decode_token(access_token)
-                print(decoded_token)
+                #print(decoded_token)
                 user_id = decoded_token.get("id", None)
                 role = decoded_token.get("user_type", None)
                 if role != "normal":
@@ -161,7 +161,7 @@ def admin_token_required(func):
         try:
             authorization_header = request.headers.get('Authorization', "")
             authorization_header = authorization_header.split(" ")
-            print(authorization_header)
+            #print(authorization_header)
             if len(authorization_header) < 2:
                 return {"message": "Invalid authorization format use the format \'Bearer <TOKEN>\'"}, 400
             access_token = authorization_header[1]

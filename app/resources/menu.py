@@ -85,7 +85,7 @@ class MenuResource(Resource):
         if not isinstance(menu_id, str) and not isinstance(menu_id, int):
             return {"message": "The menu item with id %s does not exist" % menu_id}, 404
         meal = Menu.find_by_id(meal_id=menu_id)
-        print(meal)
+        #print(meal)
         if not meal:
             return {"message": "The menu item with id %s does not exist" % menu_id}, 404
         return {"message": "success", "item": meal.json}
