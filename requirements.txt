@@ -23,7 +23,7 @@ pluggy==0.7.1
 psycopg2-binary==2.7.5
 py==1.10.0
 py==1.6.0
-PyJWT==1.5.1
+PyJWT==2.4.0
 pytest==3.8.1
 pytest-cov==2.6.0
 pytz==2018.5
