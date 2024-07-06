@@ -14,7 +14,7 @@ Flask-JWT-Extended==3.13.0
 flask-pytest==0.0.5
 Flask-RESTful==0.3.6
 gunicorn==19.9.0
-idna==2.7
+idna==3.7
 itsdangerous==0.24
 Jinja2==2.11.3
 MarkupSafe==1.0
